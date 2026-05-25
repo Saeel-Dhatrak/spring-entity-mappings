@@ -120,3 +120,87 @@
 - So here we flipped the annoatations. Now the database will have :
     - Social_User table with just one columns "ID"
     - Social_Profile tabel with two columns "ID" and "SOCIAL_USER"
+
+- *Note : Important to remember in 1:1 is non owning side have to make use of the mappedBy*
+
+### One to Many AND Many to One Relationship
+- To understand this we will have User and Post classes.
+- User can do multiple posts in socialmedia application. User can have n posts
+- Similarly many posts can belong to a user. n post can have a single user
+- So its one to Many from User to Post and Many to Oe from Posts to Users
+- ```java
+    import jakarta.persistence.Entity;
+    import jakarta.persistence.GeneratedValue;
+    import jakarta.persistence.GenerationType;
+    import jakarta.persistence.Id;
+
+    @Entity
+    public class Post {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+    }
+    //------------------------------------------------------------//
+    import jakarta.persistence.*;
+    import java.util.ArrayList;
+    import java.util.List;
+
+    @Entity
+    public class SocialUser {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @OneToOne(mappedBy = "user")
+        //@JoinColumn(name = "social_profile_id")
+        private SocialProfile socialProfile;
+
+        @OneToMany
+        private List<Post> posts = new ArrayList<>();
+    }
+  ```
+- So the database will have :
+    - Post table with just one columns "ID"
+    - Social_User table with just one columns "ID"
+    - And 3rd table named Social_User_Posts with two columns "ID" and "SOCIAL_USER_ID"
+- The relationship between Post and User table is managed in the third table which is getting created automatically. To get rid of the 3rd tale we can do:
+- Post should consist of userID which will tell you which user is doing the post. So one user will the post and that post will have the userId linking back to the User Table. With this the system will know how many post are being done by which user
+- ```java
+    import jakarta.persistence.*;
+
+    @Entity
+    public class Post {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @ManyToOne
+        @JoinColumn(name = "user_id")
+        private SocialUser socialUser;
+    }
+    //------------------------------------------------------------//
+    import jakarta.persistence.*;
+
+    import java.util.ArrayList;
+    import java.util.List;
+
+    @Entity
+    public class SocialUser {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @OneToOne(mappedBy = "user")
+        //@JoinColumn(name = "social_profile_id")
+        private SocialProfile socialProfile;
+
+        @OneToMany(mappedBy = "socialUser")
+        private List<Post> posts = new ArrayList<>();
+    }
+  ```
+- So the database will have :
+    - Post table with two columns "ID" and "USER_ID"
+    - Social_User table with just one column "ID"
+- So in case of One to Many AND Many to One Relationship, JPA will see the join column attribute value is managing the relationship
+- *Note : Important to remember in 1:n is non owning side have to make use of the mappedBy*
