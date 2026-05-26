@@ -1,5 +1,6 @@
 package com.example.socialmedia.mappings.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
@@ -12,5 +13,6 @@ public class SocialGroup {
     private Long id;
 
     @ManyToMany(mappedBy = "groups")
+    @JsonIgnore
     private Set<SocialUser> users = new HashSet<>();
 }

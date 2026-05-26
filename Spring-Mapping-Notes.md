@@ -267,3 +267,47 @@
     - Social_User table with one column "ID"
     - Social_Group table with one column "ID"
     - Users_Group table with two columns "USER_ID" and "GROUP_ID"
+
+- if we hit the rl http://localhost:8080/social/users the we will get endless loop of data coming in because inside our SocialUser class we have "socialProfile" field and again in the SocialProfile we have the "SocialUser" field. So it's a circular loop. To avoid circular reference in bi-directional relationship we can make use of the annotation called JsonIgnore
+- ```java
+    // Inside the Social Profile class
+    @Entity
+    public class SocialProfile {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @OneToOne
+        @JoinColumn(name = "social_user")
+        @JsonIgnore
+        private SocialUser user;
+    }
+  ```
+- So this will not remove the column from the table that is the database will still have :
+    - Social_User table with one column "ID"
+    - Social_Profile table with two column "ID" and "SOCIAL_USER"
+- Same circular problem we need to solve for Post and User. Same with User and Group.
+- ```java
+    public class Post {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @ManyToOne
+        @JoinColumn(name = "user_id")
+        @JsonIgnore
+        private SocialUser socialUser;
+    }
+    //------------------------------------------------------------//
+    @Entity
+    public class SocialGroup {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @ManyToMany(mappedBy = "groups")
+        @JsonIgnore
+        private Set<SocialUser> users = new HashSet<>();
+    }
+  ```
+- *Note: @JsonIgnore is the annotation which will get rid of the Circular dependencies whenever we are dealing with the bi-directional dependencies. SO whenever you add the annotation it tells spring to exclude that side from deserialization and serialization process from object to json and vice versa*
