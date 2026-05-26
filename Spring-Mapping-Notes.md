@@ -204,3 +204,66 @@
     - Social_User table with just one column "ID"
 - So in case of One to Many AND Many to One Relationship, JPA will see the join column attribute value is managing the relationship
 - *Note : Important to remember in 1:n is non owning side have to make use of the mappedBy*
+
+
+
+### Many to Many Relationship
+- Will explain it using Users and Groups.
+- 1 User can Join Many Groups
+- 1 Group can have many Users
+- We will represent Groups inside the User using Set because we want unique elements as it does not make sense for a user to join same group twice.
+- And similarly using set in the Group as well because users need to be unique in the group as well.
+- Here we will make the SocialUser class as the owner of the relationship which means that the "mappedBy" will be inside the "Group" class.
+- ```java
+    import jakarta.persistence.*;
+    import java.util.ArrayList;
+    import java.util.HashSet;
+    import java.util.List;
+    import java.util.Set;
+
+    @Entity
+    public class SocialUser {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @OneToOne(mappedBy = "user")
+        //@JoinColumn(name = "social_profile_id")
+        private SocialProfile socialProfile;
+
+        @OneToMany(mappedBy = "socialUser")
+        private List<Post> posts = new ArrayList<>();
+
+        @ManyToMany
+        private Set<Group> groups = new HashSet<>();
+    }
+    //------------------------------------------------------------//
+    import jakarta.persistence.Entity;
+    import jakarta.persistence.ManyToMany;
+    import java.util.HashSet;
+    import java.util.Set;
+
+    @Entity
+    public class Group {
+
+        @ManyToMany(mappedBy = "groups")
+        private Set<SocialUser> users = new HashSet<>();
+    }
+  ```
+- We know that "JoinColumn" is used to define the foreign key for the entity where you are defining the relationship.
+- We also have "InverseJoinColumn" that defines the foreign key for the entity that you are defining the relationship.
+- But here we willmake use of "JoinTable" and inside it we will use the "JoinColumn" and "InverseJoinColumn".
+- ```java
+    @ManyToMany
+    @JoinTable(
+            name = "users_group",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "groupd_id")
+    )
+    private Set<Group> groups = new HashSet<>();
+  ```
+- So here we are saying that name of the table is users_group.
+- So now we will have three tables in the database:
+    - Social_User table with one column "ID"
+    - Social_Group table with one column "ID"
+    - Users_Group table with two columns "USER_ID" and "GROUP_ID"
