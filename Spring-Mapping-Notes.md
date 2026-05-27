@@ -347,3 +347,12 @@
   ```
 - This will not allow the delete operation. If we need it then we will have to add anther type that is REMOVE.
 
+### FETCH TYPES
+- It playes crucial role in defining how and when related entities are loaded from the database in relation to the parent entity.
+- There might be scenarios when you want to fetch the data from the child when the parent is fetched. This can be achived using FetchType.EAGER. The child entities are fetched along with parent directly. However this can lead to performance issues if not done in the correct way.
+- Similalry there might be scenarios when you DON'T want to fetch the data from the child when the parent is fetched. This can be achived using FetchType.LAZY. The child entities are not fetched along with parent instead they are loaded on demand
+- Default Fetch Types:
+    - OneToMany : LAZY
+    - ManyToOne : Eager
+    - ManyToMany : LAZY
+    - OneToOne : Eager
