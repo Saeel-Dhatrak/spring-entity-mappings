@@ -311,3 +311,39 @@
     }
   ```
 - *Note: @JsonIgnore is the annotation which will get rid of the Circular dependencies whenever we are dealing with the bi-directional dependencies. SO whenever you add the annotation it tells spring to exclude that side from deserialization and serialization process from object to json and vice versa*
+
+#### Cascading
+- Whenver you are performing an operation on one entity and you automatically want this operation to be propagated or cascaded to the other entities as well that are associated to that entity.
+- Example Trying to create user along with profile as well:
+- ```json
+    {
+        "id" : 1,
+        "socialProfile":{
+            "id" : 1,
+            "description": "Test"
+        }
+    }
+  ```
+- This cascadng is helpful if we want to perform entries into multiple table at a time rather than entering the data into user first then creating a social profile and associating it with the user that is already created.
+- Types of Cascading:
+    - PERSIST : In this type if you persist or save an entity, the operation is cascaded to the related entities as well
+    - MERGE : If you merge the state of an entity and cascade the operation to related entities
+    - REMOVE : you remove an entity and you want the related entities also to be deleted.
+        - Example: If we delete an user then profile, post should also get deleted.
+    - REFRESH : you refresh an entity from te database, cascade the operation to the related entities
+    - DETACH : you detach an entity from persistence context
+- When we are saving the user along with the profile then we are getting cascade issue. So we will make use of the CASCADETYPE.ALL. So if we are adding the user then add the socialprofile as well also deletng then delete as well. So that ALL the ooerations are cascaded
+- ```java
+    // In the SocialUser Class
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    //@JoinColumn(name = "social_profile_id")
+    private SocialProfile socialProfile;
+  ```
+- This will allow all the operations. But if we want to not allow the delete operation then we can make use of 
+- ```java
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    //@JoinColumn(name = "social_profile_id")
+    private SocialProfile socialProfile;
+  ```
+- This will not allow the delete operation. If we need it then we will have to add anther type that is REMOVE.
+
